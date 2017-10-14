@@ -77,25 +77,16 @@
         height: 50px;
     }
 
-    .inherit {
+    .internal {
         width: 92%;
         margin: 10px 4%;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        border-radius: 2px;
         border: none;
     }
 
     .error {
         color: red;
-    }
-
-    .tooltip {
-        background-color: black;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-        z-index: 1;
-        position: absolute;
     }
 </style>
 </head>
@@ -117,28 +108,28 @@
     </div>
 
     <div class="field">
-        <input id="patr" type="text" name="Отчество" maxlength="40">
-        <label for="patr">Отчество</label>
+        <input id="patronymic" type="text" name="Отчество" maxlength="40">
+        <label for="patronymic">Отчество</label>
     </div>
 
     <div class="field">
-        <input id="snil" type="text" name="СНИЛС" title="Введите числа вида nnn-nnn-nnn nn"
+        <input id="snils" type="text" name="СНИЛС" title="Введите числа вида nnn-nnn-nnn nn"
                pattern="\d{3}-\d{3}-\d{3} \d{2}" required>
-        <label for="snil">СНИЛС</label>
+        <label for="snils">СНИЛС</label>
     </div>
 
     <div class="field">
-        <input id="bdate" type="text" name="ДатаРождения" title="Введите дату вида dd.mm.yyyy"
+        <input id="birthday" type="text" name="ДатаРождения" title="Введите дату вида dd.mm.yyyy"
                pattern="\d{2}.\d{2}.\d{4}" required>
-        <label for="bdate">Дата Рождения</label>
+        <label for="birthday">Дата рождения</label>
     </div>
 
     <div class="field">
-        <select id="davailable" name="НаличиеДанных" required>
+        <select id="available" name="НаличиеДанных" required>
             <option value="ДА">ДА</option>
             <option value="НЕТ">НЕТ</option>
         </select>
-        <label for="davailable">Наличие Данных</label>
+        <label for="available">Наличие данных</label>
     </div>
 
     <div class="field header-field">
@@ -146,25 +137,25 @@
     </div>
 
     <div class="field">
-        <input id="tlieyers" type="text" name="ОбщаяПродолжительностьСтраховогоСтажаЛет" data-type="number" required>
-        <label for="tlieyers">Общая продолжительность страхового стажа лет</label>
+        <input id="years" type="text" name="ОбщаяПродолжительностьСтраховогоСтажаЛет" data-type="number" required>
+        <label for="years">Общая продолжительность страхового стажа лет</label>
     </div>
 
     <div class="field">
-        <textarea id="tliemonths" name="ОбщаяПродолжительностьСтраховогоСтажаМесяцев" data-type="number" rows="2" required></textarea>
-        <label for="tliemonths">Общая продолжительность страхового стажа месяцев</label>
+        <textarea id="months" name="ОбщаяПродолжительностьСтраховогоСтажаМесяцев" data-type="number" rows="2" required></textarea>
+        <label for="months">Общая продолжительность страхового стажа месяцев</label>
     </div>
 
     <div class="field">
-        <input id="tliedays" type="text" name="ОбщаяПродолжительностьСтраховогоСтажаДней" data-type="number" required>
-        <label for="tliedays">Общая продолжительность страхового стажа дней</label>
+        <input id="days" type="text" name="ОбщаяПродолжительностьСтраховогоСтажаДней" data-type="number" required>
+        <label for="days">Общая продолжительность страхового стажа дней</label>
     </div>
 
     <input type="submit" value="Сохранить" name="bottom">
 
     <div class="field">
         <div class="header">Форма запроса</div>
-        <div class="field inherit">
+        <div class="field internal">
         <textarea id="req" name="request" rows="2" readonly></textarea>
             <label for="req">Запрос</label>
         </div>
@@ -173,8 +164,9 @@
 
 <script>
     var form = document.forms[0];
-    var summary =  form.elements.request;
-    var bottom = form.elements.bottom;
+    var result =  form.elements.request;
+    var submit = form.elements.bottom;
+    var countOfInputsArea = form.elements.length - 2;
 
 
     form.addEventListener("focus", function(event) {
@@ -197,26 +189,41 @@
         }
     };
 
-    bottom.onclick = function () {
-        if (filled()) {
-            summary.value = makeXmlString();
+    submit.onclick = function () {
+        if (completedForm() &&  !hasErrors()) {
+            result.value = makeXmlString();
             return false;
-        }
+        } else if (hasErrors()) return false;
     };
+    
+    function hasErrors() {
+        for(var i = 0; i < countOfInputsArea; i++) {
+            var element = form.elements[i];
 
-    function filled() {
-        for(var i=0; i<form.elements.length - 2; i++)
-            if(form.elements[i].required && form.elements[i].value == "") return false;
+            if (element.classList.contains("error"))
+                return true;
+        }
+
+        return false;
+    }
+
+    function completedForm() {
+        for(var i = 0; i < countOfInputsArea; i++) {
+            var element = form.elements[i];
+
+            if (element.required && element.value == "")
+                return false;
+        }
 
         return true;
     }
 
     function makeXmlString() {
         var xmlString = "<" + "ЗАПРОС_СВЕДЕНИЙ_О_СТРАХОВОМ_СТАЖЕ" + ">\n";
-        for(var i=0; i<form.elements.length - 2; i++) {
+        for(var i = 0; i < countOfInputsArea; i++) {
             var element =  form.elements[i];
 
-            if (element.id == "tlieyers")
+            if (element.id == "years")
                 xmlString += "<" + "ОбщаяПродолжительностьСтраховогоСтажаНаДатуОбращенияГражданинаВОСЗ" + ">\n";
             if(element.value != "")
                 xmlString += "<" + element.name + ">" + element.value + "</" + element.name + ">\n";
@@ -226,20 +233,6 @@
 
         return xmlString;
     }
-
-    /*function tooltip(node) {
-        var tooltip = document.createElement("span");
-        var coordNode = node.getBoundingClientRect();
-        var coordParentNode = node.parentNode.getBoundingClientRect();
-        tooltip.innerHTML = "NaN";
-        tooltip.className = "tooltip";
-        tooltip.style.left = coordParentNode.left + "px";
-        tooltip.style.top = coordParentNode.top + "px";
-
-
-        node.parentNode.appendChild(tooltip);
-    }*/
-
 </script>
 </body>
 </html>
