@@ -3,19 +3,15 @@
 <html>
 
 <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
 
-<style>
-    body {
-        margin: 0;
-    }
-
+    <style>
     * {
         box-sizing: border-box;
     }
 
     form {
-        width: 40%;
+        width: 60%;
     }
 
     input[type=text], input[type=number], select, textarea {
@@ -26,16 +22,22 @@
          border-radius: 4px;
          padding: 5px;
          float: right;
-         margin: 10px 4%;
-     }
+         margin: 10px 1%;
+    }
+
+    textarea {
+        resize: vertical;
+        overflow: auto;
+    }
 
     label {
-        width: 32%;
+        width: 38%;
         display: inline-block;
         float: right;
         text-align: right;
         margin: 10px 0;
         padding: 5px;
+        font-family: sans-serif;
     }
 
     input[type=submit] {
@@ -43,7 +45,7 @@
         background-color: #4CAF50;
         color: white;
         padding: 14px 20px;
-        margin: 0 0 10px 0;
+        margin: -18px 0 10px 0;
         border: none;
         border-radius: 4px;
         cursor: pointer;
@@ -57,8 +59,8 @@
     .field {
         width: 100%;
         position: relative;
-        border: 2px dashed lightgray;
-        margin: 10px;
+        border: 2px dotted lightgray;
+        margin: 20px 10px;
 
         content: "";
         clear: both;
@@ -66,29 +68,30 @@
     }
 
     .header {
-        height: 25px;
+        height: 30px;
         background-color: lightblue;
-        padding: 3px;
         color: steelblue;
+        font-family: sans-serif;
+        padding: 5px 10px;
     }
 
     .header-field {
         border-color: lightblue;
-        height: 50px;
+        height: 60px;
     }
 
     .internal {
-        width: 92%;
-        margin: 10px 4%;
+        width: 96%;
+        margin: 10px 2%;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         border-radius: 2px;
         border: none;
     }
 
-    .error {
+    .warning {
         color: red;
     }
-</style>
+    </style>
 </head>
 
 <body>
@@ -113,14 +116,14 @@
     </div>
 
     <div class="field">
-        <input id="snils" type="text" name="СНИЛС" title="Введите числа вида nnn-nnn-nnn nn"
-               pattern="\d{3}-\d{3}-\d{3} \d{2}" required>
+        <input id="snils" type="text" name="СНИЛС" data-type="snils"
+               title="Введите числа n вида nnn-nnn-nnn nn" required>
         <label for="snils">СНИЛС</label>
     </div>
 
     <div class="field">
-        <input id="birthday" type="text" name="ДатаРождения" title="Введите дату вида dd.mm.yyyy"
-               pattern="\d{2}.\d{2}.\d{4}" required>
+        <input id="birthday" type="text" name="ДатаРождения" data-type="date"
+               title="Введите дату вида dd.mm.yyyy" required>
         <label for="birthday">Дата рождения</label>
     </div>
 
@@ -142,7 +145,8 @@
     </div>
 
     <div class="field">
-        <textarea id="months" name="ОбщаяПродолжительностьСтраховогоСтажаМесяцев" data-type="number" rows="2" required></textarea>
+        <textarea id="months" name="ОбщаяПродолжительностьСтраховогоСтажаМесяцев"
+                  data-type="number" rows="2" required></textarea>
         <label for="months">Общая продолжительность страхового стажа месяцев</label>
     </div>
 
@@ -151,7 +155,7 @@
         <label for="days">Общая продолжительность страхового стажа дней</label>
     </div>
 
-    <input type="submit" value="Сохранить" name="bottom">
+    <input type="submit" value="Сохранить" name="submit">
 
     <div class="field">
         <div class="header">Форма запроса</div>
@@ -164,16 +168,15 @@
 
 <script>
     var form = document.forms[0];
-    var result =  form.elements.request;
-    var submit = form.elements.bottom;
-    var countOfInputsArea = form.elements.length - 2;
-
+    var request = form.elements.request;
+    var submit = form.elements.submit;
+    var countOfInputAreas = form.elements.length - 2;
 
     form.addEventListener("focus", function(event) {
         var elem = event.target;
 
-        if (elem.classList.contains("error")) {
-            elem.classList.remove("error");
+        if (elem.classList.contains("warning")) {
+            elem.classList.remove("warning");
             elem.value = "";
         }
     }, true);
@@ -181,38 +184,48 @@
     form.onchange = function(event) {
         var elem = event.target;
 
-        if (elem.dataset.type == "number") {
-            if (isNaN(elem.value) || elem.value < 0 || elem.value > 99) {
-                elem.classList.add("error");
-                elem.value = "Введите положительное число меньше 100";
-            }
+        switch (elem.dataset.type) {
+            case "number" :
+                if (isNaN(elem.value) || elem.value < 0 || elem.value > 99) {
+                    elem.classList.add("warning");
+                    elem.value = "Введите неотрицательное число меньше 100";
+                }
+                break;
+            case "date" :
+                if (elem.value.search(/\d{2}.\d{2}.\d{4}/) == -1 && elem.value != "") {
+                    elem.classList.add("warning");
+                    elem.value = "Введите дату вида dd.mm.yyyy";
+                }
+                break;
+            case "snils":
+                if (elem.value.search(/\d{3}-\d{3}-\d{3} \d{2}/) == -1 && elem.value != "") {
+                    elem.classList.add("warning");
+                    elem.value = "Введите числа n вида nnn-nnn-nnn nn";
+                }
+                break;
         }
     };
 
     submit.onclick = function () {
-        if (completedForm() &&  !hasErrors()) {
-            result.value = makeXmlString();
+        if (completedRequiredFields() && !hasWarnings()) {
+            request.value = makeXmlString();
             return false;
-        } else if (hasErrors()) return false;
+        } else if (hasWarnings()) return false;
     };
-    
-    function hasErrors() {
-        for(var i = 0; i < countOfInputsArea; i++) {
-            var element = form.elements[i];
 
-            if (element.classList.contains("error"))
-                return true;
+    function hasWarnings() {
+        for(var i = 0; i < countOfInputAreas; i++) {
+            if (form.elements[i].classList.contains("warning")) return true;
         }
 
         return false;
     }
 
-    function completedForm() {
-        for(var i = 0; i < countOfInputsArea; i++) {
+    function completedRequiredFields() {
+        for(var i = 0; i < countOfInputAreas; i++) {
             var element = form.elements[i];
 
-            if (element.required && element.value == "")
-                return false;
+            if (element.required && element.value == "") return false;
         }
 
         return true;
@@ -220,12 +233,13 @@
 
     function makeXmlString() {
         var xmlString = "<" + "ЗАПРОС_СВЕДЕНИЙ_О_СТРАХОВОМ_СТАЖЕ" + ">\n";
-        for(var i = 0; i < countOfInputsArea; i++) {
+        for(var i = 0; i < countOfInputAreas; i++) {
             var element =  form.elements[i];
 
             if (element.id == "years")
                 xmlString += "<" + "ОбщаяПродолжительностьСтраховогоСтажаНаДатуОбращенияГражданинаВОСЗ" + ">\n";
-            if(element.value != "")
+
+            if (element.value != "")
                 xmlString += "<" + element.name + ">" + element.value + "</" + element.name + ">\n";
         }
         xmlString += "</" + "ОбщаяПродолжительностьСтраховогоСтажаНаДатуОбращенияГражданинаВОСЗ" + ">\n";
