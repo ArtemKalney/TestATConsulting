@@ -62,7 +62,6 @@
         border: 2px dotted lightgray;
         margin: 20px 10px;
 
-        content: "";
         clear: both;
         display: table;
     }
@@ -192,13 +191,13 @@
                 }
                 break;
             case "date" :
-                if (elem.value.search(/\d{2}.\d{2}.\d{4}/) == -1 && elem.value != "") {
+                if (elem.value.replace(/\d{2}.\d{2}.\d{4}/, "") != "" && elem.value != "") {
                     elem.classList.add("warning");
                     elem.value = "Введите дату вида dd.mm.yyyy";
                 }
                 break;
             case "snils":
-                if (elem.value.search(/\d{3}-\d{3}-\d{3} \d{2}/) == -1 && elem.value != "") {
+                if (elem.value.replace(/\d{3}-\d{3}-\d{3} \d{2}/, "") != "" && elem.value != "") {
                     elem.classList.add("warning");
                     elem.value = "Введите числа n вида nnn-nnn-nnn nn";
                 }
